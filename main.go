@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"user-registration/database"
 	"user-registration/handlers"
+	"user-registration/middlewares"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -30,14 +31,17 @@ func main() {
 	// 登录路由
 	r.POST("/login", handlers.Login)
 
-	authorized := r.Group("/home")
-	authorized.Use(handlers.AuthMiddleware())
+	// 受保护的路由
+	protected := r.Group("/home")
+	protected.Use(middlewares.JWTAuthMiddleware())
 	{
-		authorized.GET("/", func(c *gin.Context) {
-			role, _ := c.Get("role")
-			c.JSON(http.StatusOK, gin.H{"message": "Welcome to the home page!", "role": role})
+		protected.GET("/", func(c *gin.Context) {
+			username := c.MustGet("username").(string)
+			role := c.MustGet("role").(string)
+			c.JSON(http.StatusOK, gin.H{"message": "Welcome to the protected route", "username": username, "role": role})
 		})
 	}
+
 	// 启动服务
 	r.Run(":8080")
 }

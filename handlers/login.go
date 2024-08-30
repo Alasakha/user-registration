@@ -7,13 +7,20 @@ import (
 	"user-registration/database"
 	"user-registration/models"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
 // JWT密钥（应存放在安全的地方）
-var jwtKey = []byte("secret_key")
+var JwtKey = []byte("secret_key")
+
+// 声明一个用于生成JWT的结构
+type Claims struct {
+	Username string `json:"username"`
+	Role     string `json:"role"`
+	jwt.RegisteredClaims
+}
 
 func Login(c *gin.Context) {
 	var input models.User
@@ -33,52 +40,26 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// 创建JWT
-	expirationTime := time.Now().Add(24 * time.Hour)
-	claims := &models.Claims{
+	// 生成JWT Token
+	expirationTime := time.Now().Add(time.Hour * 1) // 设置token一小时后过期
+	claims := &Claims{
 		Username: user.Username,
-		Role:     user.Role, // 包含用户角色
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expirationTime.Unix(),
+		Role:     user.Role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(jwtKey)
+	tokenString, err := token.SignedString(JwtKey)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
 	}
 
-	// 设置Token到cookie中
-	c.SetCookie("token", tokenString, int(expirationTime.Unix()), "/", "", false, true)
-
-	// 成功登录后返回成功消息
-	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
-}
-
-// AuthMiddleware to check if the user is authenticated
-func AuthMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		tokenString, err := c.Cookie("token")
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-			c.Abort()
-			return
-		}
-
-		claims := &models.Claims{}
-		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-			return models.JwtKey, nil
-		})
-		if err != nil || !token.Valid {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-			c.Abort()
-			return
-		}
-
-		c.Set("username", claims.Username)
-		c.Set("role", claims.Role)
-		c.Next()
-	}
+	// 返回包含token和message的JSON对象
+	c.JSON(http.StatusOK, gin.H{
+		"token":   tokenString,
+		"message": "Login successful",
+	})
 }
