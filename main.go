@@ -14,8 +14,16 @@ import (
 func main() {
 	r := gin.Default()
 
-	// 允许所有来源的CORS请求
-	r.Use(cors.Default())
+	// // 允许所有来源的CORS请求
+	// r.Use(cors.Default())
+	// 配置CORS中间件
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"}, // 前端应用的URL
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Authorization", "Content-Type"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
 	// 初始化数据库
 	database.Connect()
@@ -40,6 +48,7 @@ func main() {
 			role := c.MustGet("role").(string)
 			c.JSON(http.StatusOK, gin.H{"message": "Welcome to the protected route", "username": username, "role": role})
 		})
+		protected.GET("/user/info", handlers.GetUserInfo) // 添加获取用户信息的路由
 	}
 
 	// 启动服务

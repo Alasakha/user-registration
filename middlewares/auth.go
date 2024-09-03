@@ -2,7 +2,9 @@ package middlewares
 
 import (
 	"net/http"
+	"user-registration/database"
 	"user-registration/handlers"
+	"user-registration/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -38,4 +40,22 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+// 获取用户信息的处理函数
+func GetUserInfo(c *gin.Context) {
+	username := c.MustGet("username").(string)
+
+	var user models.User
+	if err := database.DB.Where("username = ?", username).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"id":       user.ID,
+		"username": user.Username,
+		"email":    user.Email,
+		"role":     user.Role,
+	})
 }
