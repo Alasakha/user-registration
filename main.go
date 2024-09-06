@@ -1,9 +1,10 @@
-// main.go
 package main
 
 import (
+	"log"
 	"net/http"
-	"user-registration/database"
+	"user-registration/controllers"
+	"user-registration/database" // 确保正确引入
 	"user-registration/handlers"
 	"user-registration/middlewares"
 
@@ -14,8 +15,6 @@ import (
 func main() {
 	r := gin.Default()
 
-	// // 允许所有来源的CORS请求
-	// r.Use(cors.Default())
 	// 配置CORS中间件
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"}, // 前端应用的URL
@@ -26,15 +25,28 @@ func main() {
 	}))
 
 	// 初始化数据库
-	database.Connect()
+	err := database.Connect()
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+	defer func() {
+		sqlDB, _ := database.DB.DB()
+		sqlDB.Close()
+	}()
+
+	// 将数据库连接添加到 Gin 的上下文
+	r.Use(func(c *gin.Context) {
+		c.Set("db", database.DB)
+		c.Next()
+	})
 
 	// 设置根路由
 	r.GET("/", func(c *gin.Context) {
 		c.String(200, "API is running")
 	})
 
-	// 路由配置
-	r.POST("/register", handlers.Register)
+	// 注册路由
+	// r.POST("/register", handlers.Register)
 
 	// 登录路由
 	r.POST("/login", handlers.Login)
@@ -48,7 +60,13 @@ func main() {
 			role := c.MustGet("role").(string)
 			c.JSON(http.StatusOK, gin.H{"message": "Welcome to the protected route", "username": username, "role": role})
 		})
-		protected.GET("/user/info", handlers.GetUserInfo) // 添加获取用户信息的路由
+		protected.GET("/user/info", handlers.GetUserInfo) // 获取用户信息的路由
+
+		// 新增的菜单路由，基于角色从数据库返回动态菜单
+		protected.GET("/menu", controllers.GetMenu)
+
+		// 注册路由
+		protected.POST("/register", handlers.Register)
 	}
 
 	// 启动服务
