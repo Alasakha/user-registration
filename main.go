@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"user-registration/controllers"
 	"user-registration/database" // 确保正确引入
 	"user-registration/handlers"
@@ -45,28 +44,21 @@ func main() {
 		c.String(200, "API is running")
 	})
 
-	// 注册路由
-	// r.POST("/register", handlers.Register)
-
 	// 登录路由
 	r.POST("/login", handlers.Login)
 
 	// 受保护的路由
-	protected := r.Group("/home")
+	protected := r.Group("/")
 	protected.Use(middlewares.JWTAuthMiddleware())
 	{
-		protected.GET("/", func(c *gin.Context) {
-			username := c.MustGet("username").(string)
-			role := c.MustGet("role").(string)
-			c.JSON(http.StatusOK, gin.H{"message": "Welcome to the protected route", "username": username, "role": role})
-		})
+
 		protected.GET("/user/info", handlers.GetUserInfo) // 获取用户信息的路由
 
 		// 新增的菜单路由，基于角色从数据库返回动态菜单
 		protected.GET("/menu", controllers.GetMenu)
 
 		// 注册路由
-		protected.POST("/register", handlers.Register)
+		protected.POST("/manage/register", handlers.Register)
 	}
 
 	// 启动服务

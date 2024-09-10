@@ -10,8 +10,9 @@ type Route struct {
 }
 
 type MenuItem struct {
-	Label    string     `json:"label"`
-	Path     string     `json:"path"`
-	Icon     string     `json:"icon"`
-	Children []MenuItem `json:"children,omitempty"` // 子菜单项
+	ID       int         `json:"id"`
+	Label    string      `json:"label"`
+	Path     string      `json:"path"`
+	Icon     string      `json:"icon"`
+	Children []*MenuItem `json:"children,omitempty"` // 子菜单项
 }
