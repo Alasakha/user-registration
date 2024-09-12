@@ -59,6 +59,9 @@ func main() {
 
 		// 注册路由
 		protected.POST("/manage/register", handlers.Register)
+
+		//分页接口
+		protected.GET("/manage/userrole", handlers.Pagecut)
 	}
 
 	// 启动服务
