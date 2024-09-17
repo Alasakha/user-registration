@@ -54,7 +54,7 @@ func Login(c *gin.Context) {
 	}
 
 	// 生成JWT Token
-	expirationTime := time.Now().Add(time.Hour * 1) // Token 1小时后过期
+	expirationTime := time.Now().Add(time.Hour * 2) // Token 1小时后过期
 	claims := &Claims{
 		Username: user.Username,
 		Role:     user.Role,

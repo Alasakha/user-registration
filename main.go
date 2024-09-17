@@ -51,7 +51,6 @@ func main() {
 	protected := r.Group("/")
 	protected.Use(middlewares.JWTAuthMiddleware())
 	{
-
 		protected.GET("/user/info", handlers.GetUserInfo) // 获取用户信息的路由
 
 		// 新增的菜单路由，基于角色从数据库返回动态菜单
@@ -60,8 +59,17 @@ func main() {
 		// 注册路由
 		protected.POST("/manage/register", handlers.Register)
 
-		//分页接口
+		// 分页接口
 		protected.GET("/manage/userrole", handlers.Pagecut)
+
+		// 获得菜单接口
+		protected.GET("/manage/userrole/departments", handlers.GetDepartmentTreeHandler)
+
+		// 添加职位相关的路由
+		protected.GET("/manage/positions", controllers.GetPositions)         // 获取所有职位
+		protected.POST("/manage/positions", controllers.CreatePosition)      // 创建新职位
+		protected.PUT("manage/positions/:id", controllers.UpdatePosition)    // 更新职位
+		protected.DELETE("manage/positions/:id", controllers.DeletePosition) // 删除职位
 	}
 
 	// 启动服务

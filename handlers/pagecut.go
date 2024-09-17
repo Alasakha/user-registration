@@ -15,6 +15,9 @@ type User struct {
 	Email     string `json:"email"`
 	CreatedAt string `json:"created_at"`
 	Role      string `json:"role"`
+	// 如果需要显示部门和职位名称
+	Department string `json:"department"`
+	Position   string `json:"position"`
 }
 
 // Pagecut 实现分页接口
@@ -46,8 +49,21 @@ func Pagecut(c *gin.Context) {
 
 	// 计算偏移量，查询分页数据
 	offset := (page - 1) * pageSize
-	db.Offset(offset).Limit(pageSize).Find(&users)
-
+	// 查询用户数据并关联部门和职位信息
+	// db.Table("users").
+	// 	Select("users.id, users.username, users.email, users.created_at, users.role, departments.name as department, positions.name as positions").
+	// 	Joins("LEFT JOIN departments ON users.department_id = departments.id").
+	// 	Joins("LEFT JOIN positions ON users.position_id = positions.id").
+	// 	Offset(offset).
+	// 	Limit(pageSize).
+	// 	Find(&users)
+	db.Debug().Table("users").
+		Select("users.id, users.username, users.email, users.created_at, users.role, departments.name as department, positions.name as position").
+		Joins("LEFT JOIN departments ON users.department_id = departments.id").
+		Joins("LEFT JOIN positions ON users.position_id = positions.id").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&users)
 	// 返回分页数据
 	c.JSON(http.StatusOK, gin.H{
 		"code":     200,
