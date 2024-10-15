@@ -65,11 +65,11 @@ func main() {
 		// 获得菜单接口
 		protected.GET("/manage/userrole/departments", handlers.GetDepartmentTreeHandler)
 
-		// 添加职位相关的路由
-		protected.GET("/manage/positions", controllers.GetPositions)         // 获取所有职位
-		protected.POST("/manage/positions", controllers.CreatePosition)      // 创建新职位
-		protected.PUT("manage/positions/:id", controllers.UpdatePosition)    // 更新职位
-		protected.DELETE("manage/positions/:id", controllers.DeletePosition) // 删除职位
+		// 添加部门相关的路由
+		// protected.GET("/manage/positions", controllers.GetPositions)         // 获取所有职位
+		protected.POST("/manage/createdepart", handlers.PostDepartment) // 创建新职位
+		// protected.PUT("manage/positions/:id", controllers.UpdatePosition)    // 更新职位
+		// protected.DELETE("manage/positions/:id", controllers.DeletePosition) // 删除职位
 	}
 
 	// 启动服务

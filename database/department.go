@@ -44,21 +44,24 @@ func GetDepartmentTree() ([]models.Company, error) {
 	}
 
 	// 递归构建子部门树，并为每个部门添加岗位
-	var buildDepartmentTree func(deps []models.Department) []models.Department
-	buildDepartmentTree = func(deps []models.Department) []models.Department {
+	var buildDepartmentTree func(deps []models.Department, companyID uint) []models.Department
+	buildDepartmentTree = func(deps []models.Department, companyID uint) []models.Department {
+		var result []models.Department
 		for i := range deps {
-			deps[i].Children = departmentMap[deps[i].ID]
-			deps[i].Positions = positionMap[deps[i].ID] // 将岗位作为叶子节点添加
-			if len(deps[i].Children) > 0 {
-				deps[i].Children = buildDepartmentTree(deps[i].Children)
+			if deps[i].CompanyID == companyID { // 确保部门属于当前公司
+				// 递归构建子部门
+				children := buildDepartmentTree(departmentMap[deps[i].ID], companyID)
+				deps[i].Children = children
+				deps[i].Positions = positionMap[deps[i].ID] // 将岗位作为叶子节点添加
+				result = append(result, deps[i])            // 只将当前公司部门添加到结果中
 			}
 		}
-		return deps
+		return result
 	}
 
 	// 将部门分配到对应的公司下
 	for i := range companies {
-		companies[i].Children = buildDepartmentTree(departmentMap[companies[i].ID])
+		companies[i].Children = buildDepartmentTree(departmentMap[companies[i].ID], companies[i].ID) // 确保传递公司ID
 	}
 
 	return companies, nil
