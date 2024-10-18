@@ -16,7 +16,7 @@ func main() {
 
 	// 配置CORS中间件
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"}, // 前端应用的URL
+		AllowOrigins:     []string{"http://localhost:3001"}, // 这里是前端地址
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Authorization", "Content-Type"},
 		ExposeHeaders:    []string{"Content-Length"},
