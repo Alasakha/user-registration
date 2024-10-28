@@ -70,6 +70,13 @@ func main() {
 		protected.POST("/manage/createdepart", handlers.PostDepartment) // 创建新职位
 		// protected.PUT("manage/positions/:id", controllers.UpdatePosition)    // 更新职位
 		// protected.DELETE("manage/positions/:id", controllers.DeletePosition) // 删除职位
+
+		//关于菜单的接口
+		protected.POST("/manage/createmenu", handlers.PostMenu)         // 创建菜单
+		protected.GET("/manage/getmenu", handlers.GetMenuList)          //获取菜单
+		protected.PUT("/manage/putmenu/:id", handlers.UpdateMenu)       // 更新菜单
+		protected.DELETE("/manage/deletemenu/:id", handlers.DeleteMenu) //删除菜单
+
 	}
 
 	// 启动服务
