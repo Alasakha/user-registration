@@ -13,6 +13,4 @@ type User struct {
 	Role          string `json:"role"`
 	Department_id string `json:"department_id"`
 	Position_id   string `json:"position_id"`
-	Department    string `json:"department"`
-	Position      string `json:"position"`
 }
