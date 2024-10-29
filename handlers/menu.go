@@ -27,12 +27,10 @@ func PostMenu(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "菜单创建成功", "data": menu})
 }
 
-// (2)获取树形结构
+// (2) 获取树形结构
 func GetMenuList(c *gin.Context) {
 	log.Println("Received request to get menu list") // 添加日志
 	var menus []models.Menu
-<<<<<<< HEAD
-
 	if err := database.DB.Order("sort_order").Find(&menus).Error; err != nil {
 		log.Printf("Database query error: %v", err) // 打印错误信息
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "无法获取菜单列表"})
@@ -47,27 +45,13 @@ func GetMenuList(c *gin.Context) {
 		"code": 200,
 		"data": menuTree,
 	})
-=======
-	if err := database.DB.Order("sort_order").Find(&menus).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "无法获取菜单列表"})
-		return
-	}
-	// 构建树形结构的菜单列表
-	menuTree := buildMenuTree(menus, nil)
-	c.JSON(http.StatusOK, gin.H{"data": menuTree})
->>>>>>> b90a3c34a06efc9cbcaf3a6d89a56c7a26884d88
 }
 
 func buildMenuTree(menus []models.Menu, parentID *uint) []models.Menu {
 	var tree []models.Menu
 	for _, menu := range menus {
-<<<<<<< HEAD
 		if (parentID == nil && menu.ParentID == nil) || (parentID != nil && menu.ParentID != nil && *parentID == *menu.ParentID) {
-			menu.Children = buildMenuTree(menus, &menu.ID) // 传入当前菜单的ID
-=======
-		if menu.ParentID == parentID {
 			menu.Children = buildMenuTree(menus, &menu.ID)
->>>>>>> b90a3c34a06efc9cbcaf3a6d89a56c7a26884d88
 			tree = append(tree, menu)
 		}
 	}
@@ -75,9 +59,6 @@ func buildMenuTree(menus []models.Menu, parentID *uint) []models.Menu {
 }
 
 // （3）更新菜单接口
-// 通过 id 获取菜单并更新：
-// go
-// 复制代码
 func UpdateMenu(c *gin.Context) {
 	var menu models.Menu
 	id := c.Param("id") // 获取 ID
@@ -105,7 +86,7 @@ func UpdateMenu(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "菜单更新成功"})
 }
 
-// 通过 id 删除菜单：
+// 通过 id 删除菜单
 func DeleteMenu(c *gin.Context) {
 	id := c.Param("id")
 
